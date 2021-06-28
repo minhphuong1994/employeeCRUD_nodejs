@@ -10,7 +10,8 @@ app.use(express.static("public"))
 app.use(body_parser.urlencoded({extended:true})) //for getting data from UI form body
 
 app.listen(3000,()=>{
-    mongoose.connect("mongodb+srv://phuong:abcd123@practise.tdh94.mongodb.net/DemoUser?retryWrites=true&w=majority",{useUnifiedTopology:true,useNewUrlParser:true},(error)=>{
+    mongoose.connect("mongodb+srv://phuong:abcd123@practise.tdh94.mongodb.net/BestBuy?retryWrites=true&w=majority",
+    {useUnifiedTopology:true,useNewUrlParser:true},(error)=>{
         if(error){
             console.log(error)
             console.log("Connection failed!")
@@ -20,20 +21,19 @@ app.listen(3000,()=>{
     })
 })
 
-
 const empSchema = mongoose.Schema({
     name: String,
     city: String,
-    salary: Number,
+    contact: String,
     email: String,
-    department:String
+    salary: Number
 })
 
-const empz = mongoose.model("empz",empSchema)
+const emp = mongoose.model("emp",empSchema)
 
 //Get all data
-app.get("/",(red,res)=>{    
-    empz.find({},(error,records)=>{
+app.get("/",(req,res)=>{    
+    emp.find({},(error,records)=>{
         if(error){
             console.log(error)
             console.log("Failed to get recrods!")
@@ -46,6 +46,8 @@ app.get("/",(red,res)=>{
     })   
 })
 
+
+
 app.get("/add",(req,res)=>{
     res.render("insert")
 })
@@ -53,13 +55,13 @@ app.get("/add",(req,res)=>{
 
 //Create
 app.post("/create",(req,res)=>{
-    let emp = req.body
-    empz.create({
-        name: emp.name,
-        city: emp.city,
-        salary: emp.salary,
-        email: emp.email,
-        department:emp.department
+    let emp_data = req.body
+    emp.create({
+        name: emp_data.name,
+        city: emp_data.city,
+        contact: emp_data.contact,
+        email: emp_data.email,
+        salary: emp_data.salary
     },(error,created)=>{
         if(error)
             console.log("Failed to create!! "+error)
@@ -69,11 +71,25 @@ app.post("/create",(req,res)=>{
         }
     })    
 })
+ 
+//Delete based on id
+app.get("/delete/:id",(req,res)=>{
+    let id = req.params.id
+    emp.findByIdAndDelete(id,(error,deleted)=>{
+        if(error)
+            console.log("Failed to delete! -- "+error)
+        else{
+            console.log(deleted)
+            res.redirect("/")
+        }
+    })
+})
+
 
 app.get("/edit/:id",(req,res)=>{
     let id = req.params.id
 
-    empz.findById(id,(error,response)=>{
+    emp.findById(id,(error,response)=>{
         if(error)
             console.log("Failed to find record by ID!! "+error)
         else{
@@ -89,13 +105,13 @@ app.get("/edit/:id",(req,res)=>{
 //Update based on id
 app.post("/update/:id",(req,res)=>{
     let id = req.params.id
-    let emp = req.body
-    empz.findByIdAndUpdate(id,{
-        name: emp.name,
-        city: emp.city,
-        salary: emp.salary,
-        email: emp.email,
-        department: emp.department
+    let emp_data = req.body
+    emp.findByIdAndUpdate(id,{
+        name: emp_data.name,
+        city: emp_data.city,
+        contact: emp_data.contact,
+        email: emp_data.email,
+        salary: emp_data.salary
     },(error,updated)=>{
         if(error)
             console.log("Failed to Update -- "+error)
@@ -105,18 +121,3 @@ app.post("/update/:id",(req,res)=>{
         }
     })
 })
-
-//Delete based on id
-app.get("/delete/:id",(req,res)=>{
-    let id = req.params.id
-    empz.findByIdAndDelete(id,(error,deleted)=>{
-        if(error)
-            console.log("Failed to delete! -- "+error)
-        else{
-            console.log(deleted)
-            res.redirect("/")
-        }
-    })
-})
-
-
